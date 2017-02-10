@@ -1,56 +1,20 @@
 <template>
     <div id="grade">
         <div>
-         <mu-tabs class="grade-tabs" :value="activeTab" @change="getGrade">
-            <mu-tab value="gpa" title="本学期成绩"/>
-            <mu-tab value="gpa/all" title="所有成绩"/>
-            <mu-tab value="gpa/not-pass" title="不及格成绩"/>
+         <mu-tabs class="grade-tabs" :value="activeTab" @change="switchTab">
+            <mu-tab value="0" title="本学期成绩"/>
+            <mu-tab value="1" title="所有成绩" @click="getGradeAll"/>
+            <mu-tab value="2" title="不及格成绩" @click="getNotPass"/>
           </mu-tabs>
         </div>
-        <mu-card v-for="grade in grades">
-          <mu-card-title v-if="grade.grades[0].term_name" :title="grade.grades[0].term_name" subTitle="@飞扬俱乐部" />
-          <mu-card-title v-if="!grade.grades[0].term_name" title="本学期成绩" subTitle="@飞扬俱乐部" />
-          <mu-card-text>
-          <div class="grade-head">
-              <div>
-                  <div class="left">必修绩点：<span>{{grade.avg.required.gpa}}</span></div>
-                  <div class="right">必修平均分：<span>{{grade.avg.required.grade}}</span></div>
-              </div>
-              <div>
-                  <div class="left">全部绩点：<span>{{grade.avg.all.gpa}}</span></div>
-                  <div class="right">全部平均分：<span>{{grade.avg.all.grade}}</span></div>
-              </div>
-          </div>
-           <mu-table class="t-1" @rowSelection="selectedGrade" :enableSelectAll=true :multiSelectable=true >
-                <colgroup>
-                    <col width="40">
-                    <col width="120">
-                    <col width="40">
-                    <col width="30">
-                    <col width="30">
-                    <col width="50">
-                </colgroup>
-             <mu-thead>
-               <mu-tr>
-                 <mu-th>课程名</mu-th>
-                 <mu-th>分数</mu-th>
-                 <mu-th>绩点</mu-th>
-                 <mu-th>学分</mu-th>
-                 <mu-th>属性</mu-th>
-               </mu-tr>
-             </mu-thead>
-             <mu-tbody>
-               <mu-tr v-for="g in grade.grades">
-                 <mu-td>{{g.course_name}}</mu-td>
-                 <mu-td>{{g.grade}}</mu-td>
-                 <mu-td>{{g.gpa}}</mu-td>
-                 <mu-td>{{g.credit}}</mu-td>
-                 <mu-td>{{g.course_type}}</mu-td>
-               </mu-tr>
-             </mu-tbody>
-           </mu-table>
-          </mu-card-text>
-        </mu-card>
+        
+        <my-grade v-if="activeTab==0" :isHead=true :grade="grade" title="本学期成绩" ></my-grade>
+
+        <my-grade v-if="activeTab==1" :isHead=true :grade="grade" :title="grade.grades[0].term_name"  v-for="grade in gradeAll" ></my-grade>
+
+        <my-grade v-if="activeTab!=0" :isHead=false :grade="notPass[0]" title="尚不及格" ></my-grade>
+
+        <my-grade v-if="activeTab!=0" :isHead=false :grade="notPass[1]" title="曾不及格" ></my-grade>
 
         
          <mu-bottom-nav class="bottom" :value="bottomData" :shift=true @change="handleChange">
@@ -64,59 +28,52 @@
 
 <script>
 import {tabs,tab} from "muse-components/tabs"
-import {card,cardHeader,cardTitle,cardText} from "muse-components/card"
-import {table,tr,td,th,tbody,thead} from "muse-components/table"
 import {bottomNav,bottomNavItem} from "muse-components/bottomNav"
+import gradeItem from "../../components/grade-item.vue"
 import axios from 'axios'
 import gradeObj from '../../js/grade.js'
 axios.defaults.headers['Content-Type'] = 'application/x-www-form-urlencoded'
 const qs = require('querystring')
+let test={
+  avg:{
+    required:{},
+    all:{}
+  },
+  grades:{}
+}
     export default{
         components:{
-            "mu-table":table,
-            "mu-thead":thead,
-            "mu-th":th,
-            "mu-tr":tr,
-            "mu-td":td,
-            "mu-tbody":tbody,
             "mu-bottom-nav":bottomNav,
             "mu-bottom-nav-item":bottomNavItem,
-            "mu-card":card,
-            "mu-card-header":cardHeader,
-            "mu-card-title":cardTitle,
-            "mu-card-text":cardText,
             "mu-tabs":tabs,
-            "mu-tab":tab
+            "mu-tab":tab,
+            "my-grade":gradeItem
         },
         methods:{
-            selectedGrade(data){
-                console.log(this)
+            selectedGrade(data,e){
+                console.log(e);
+                console.log(data)
             },
             handleChange (val) {
               this.bottomData = val
             },
-            getGrade(path){
-                this.activeTab=path;
-                let _this=this;
-                let params={
-                    "uid":"2014141453066",
-                    "password":"lailin123"
+            switchTab(val){
+                this.activeTab=val;
+            },
+            getGradeAll(){
+                if(this.check.gpaAll!=0){
+                    return
                 }
-                let url="http://120.26.53.243:6627/"+path
-                axios.post(url,qs.stringify(params))
+                let _this=this;
+                let url="http://120.26.53.243:6627/gpa/all"
+                axios.post(url,qs.stringify(this.params))
                 .then(function (response) {
                     let  res=response.data;
                     if(res.status){
-                       // _this.grades.shift()
-                       let g
-                        if(res.data && res.data[0][0]){
-                            g=gradeObj.cal(res.data)
-                        }else{
-                            g=gradeObj.cal([res.data])
-                        }
-                        console.log(g);
-                        _this.grades=g.reverse()
-                       
+                       let g=gradeObj.cal(res.data);
+                        _this.gradeAll=g.reverse();
+                        _this.check.gpaAll=1;
+                        _this.getNotPass()
                     }else{
                         console.log(res.msg);
                     }
@@ -127,16 +84,72 @@ const qs = require('querystring')
                 });
             },
             getNotPass(){
-            
+                if(this.check.notPass!=0){
+                    return
+                }
+                let _this=this;
+                let url="http://120.26.53.243:6627/gpa/not-pass";
+                axios.post(url,qs.stringify(this.params))
+                .then(function (response) {
+                    let  res=response.data;
+                    if(res.status){
+                        _this.notPass=gradeObj.cal(res.data);
+                        _this.check.notPass=1;
+                    }else{
+                        console.log(res.msg);
+                    }
+                })
+                .catch(function (response) {
+                  // console.log(error);
+                  console.log(response.message);
+                });
+            },
+            getGrade(){
+                if(this.check.gpa!=0){
+                    return
+                }
+                let _this=this;
+                let url="http://120.26.53.243:6627/gpa";
+                axios.post(url,qs.stringify(this.params))
+                .then(function (response) {
+                    let  res=response.data;
+                    if(res.status){
+                        _this.grade=gradeObj.cal([res.data])[0];
+                        console.log(_this.grade);
+                        _this.check.gpa=1;
+                    }else{
+                        console.log(res.msg);
+                    }
+                })
+                .catch(function (response) {
+                  // console.log(error);
+                  console.log(response.message);
+                });
             }
         },
-
         data (){
             return{
                 bottomData: 'movies',
-                activeTab: 'gpa',
-                grades:{}
+                activeTab: "0",
+                gradeAll:{},
+                grade:test,
+                notPass:[
+                    test,
+                    test
+                ],
+                check:{
+                    gpa:0,
+                    gpaAll:0,
+                    notPass:0
+                },
+                params:{
+                    "uid":"2014141463233",
+                    "password":"091925"
+                }
             }
+        },
+        mounted(){
+            this.getGrade()
         }
     }
 </script>
