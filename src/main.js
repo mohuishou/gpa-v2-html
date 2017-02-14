@@ -6,5 +6,4 @@ import 'muse-components/styles/base.less'
 new Vue({
   router: router,
   render: h => h(App)
-  // components: { firstcomponent, secondcomponent }
 }).$mount('#app')
