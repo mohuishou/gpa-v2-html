@@ -1,10 +1,9 @@
 let grade = {};
-grade.cal = function(data) {
+grade.cal = function (data) {
   let grade = [];
 
   for (let k = 0; k < data.length; k++) {
-    if(!data[k]) {
-      data.splice(k,1);
+    if (!data[k]) {
       continue;
     }
     let sum = {
@@ -34,10 +33,10 @@ grade.cal = function(data) {
     let t = [];
     for (let i = 0; i < data[k].length; i++) {
       let d = data[k][i];
-      if(!d.course_id){
+      if (!d.course_id) {
         continue;
       }
-      d.selected=false;
+      d.selected = false;
       d.gradeCal = lv2grade(d.grade);
       d.gpa = grade2gpa(d.gradeCal);
       d.credit = parseFloat(d.credit);
@@ -51,16 +50,15 @@ grade.cal = function(data) {
       sum.all.credit += d.credit;
       sum.all.gpa += d.gpa * d.credit;
     }
-    if (!t[0]) {
-      return grade;
-    }
-    if(k==2)console.log(sum);
-    //计算平均分保留两位小数
-    avg.all.gpa = (sum.all.gpa / sum.all.credit).toFixed(3);
-    avg.all.grade = (sum.all.grade / sum.all.credit).toFixed(3);
+    if (t[0]) {
+      //计算平均分保留两位小数
+      avg.all.gpa = (sum.all.gpa / sum.all.credit).toFixed(3);
+      avg.all.grade = (sum.all.grade / sum.all.credit).toFixed(3);
 
-    avg.required.gpa = (sum.required.gpa / sum.required.credit).toFixed(3);
-    avg.required.grade = (sum.required.grade / sum.required.credit).toFixed(3);
+      avg.required.gpa = (sum.required.gpa / sum.required.credit).toFixed(3);
+      avg.required.grade = (sum.required.grade / sum.required.credit).toFixed(3);
+    }
+
     grade[k] = {}
     grade[k].avg = avg;
     grade[k].sum = sum;

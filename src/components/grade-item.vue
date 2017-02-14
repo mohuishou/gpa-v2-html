@@ -32,7 +32,7 @@
           </mu-tr>
         </mu-thead>
         <mu-tbody>
-          <mu-tr v-if="g.course_name" v-for="g in grade.grades" :gpa-type="g.course_type == '必修' ? 1 : 0" :selected="g.selected">
+          <mu-tr v-if="g.course_name" v-for="g in grade.grades"  :selected="g.selected">
             <input type="hidden" class="grade" :value="g.gradeCal">
             <input type="hidden" class="credit" :value="g.credit">
             <input type="hidden" class="gpa" :value="g.gpa">

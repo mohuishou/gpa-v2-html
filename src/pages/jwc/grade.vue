@@ -1,9 +1,15 @@
 <template>
   <div>
-    <div id="login">
-
+    <div v-if="!isLogin" id="login">
+      <div>
+        <h2>四川大学绩点/平均分一键计算</h2>
+        <mu-text-field label="学号" hintText="请输入学号" :errorText="valid.uid" fullWidth labelFloat @input="getUid" /><br/>
+        <mu-text-field label="密码" hintText="请输入教务处密码" :errorText="valid.password" fullWidth type="password" labelFloat @input="getPassword"
+        /><br/>
+        <mu-raised-button label="登录" @click="login" class="demo-raised-button" fullWidth primary/>
+      </div>
     </div>
-    <div id="grade">
+    <div v-if="isLogin" id="grade">
       <div>
         <mu-tabs class="grade-tabs" :value="activeTab" @change="switchTab">
           <mu-tab value="0" title="本学期成绩" />
@@ -22,24 +28,58 @@
 
 
       <mu-bottom-nav class="bottom" :value="bottomData" :shift=true @change="handleChange">
-        <mu-bottom-nav-item value="movies" title="计算" @click.native="calculation" icon="assignment_turned_in" />
-        <mu-bottom-nav-item value="music" title="必修" @click.native="chooseRequire" icon="class" />
-        <mu-bottom-nav-item value="books" title="全选" @click.native="chooseAll" icon="select_all" />
-        <mu-bottom-nav-item value="pictures" title="清空" @click.native="clear" icon="delete_forever" />
+        <mu-bottom-nav-item value="cal" title="计算" @click.native="calculation" icon="assignment_turned_in" />
+        <mu-bottom-nav-item value="required" title="必修" @click.native="chooseRequire" icon="class" />
+        <mu-bottom-nav-item value="all" title="全选" @click.native="chooseAll" icon="select_all" />
+        <mu-bottom-nav-item value="clear" title="清空" @click.native="clear" icon="delete_forever" />
       </mu-bottom-nav>
     </div>
+    <mu-dialog :open="dialogCal" title="计算结果" @close="closeCal">
+      <div id="cal-result">
+        <div class="result">
+          <p>您一共选择了 {{avg.count}} 门课程，总计 {{avg.credit}} 学分</p>
+          <p>平均分: {{avg.grade}}</p>
+          <p>绩点: {{avg.gpa}}</p>
+        </div>
+        <div class="attention">
+          <p>注：</p>
+          <p>学分绩点=∑(课程绩点*课程学分) / 课程总学分</p>
+          <p>平均成绩=∑(课程成绩*课程学分) / 课程总学分</p>
+        </div>
+      </div>
+      <mu-flat-button slot="actions" primary @click="closeCal" label="确定" />
+    </mu-dialog>
+
+    <mu-dialog :open="errorLog" title="提示" @close="closeCal">
+      {{errorText}}
+      <br />
+      <p style="background: #eee;padding: 15px;">
+        注：如果遇到网络问题，请先测试能否直接打开教务处网站
+      </p>
+      <mu-flat-button slot="actions" primary @click="closeCal" label="确定" />
+    </mu-dialog>
   </div>
 
 </template>
 <script>
+  import "../../css/grade.less"
+
+
   import { tabs, tab } from "muse-components/tabs"
   import { bottomNav, bottomNavItem } from "muse-components/bottomNav"
   import gradeItem from "../../components/grade-item.vue"
+  import dialog from "muse-components/dialog"
+  import flatButton from "muse-components/flatButton"
+  import raisedButton from "muse-components/raisedButton"
+  import textField from "muse-components/textField"
+
+
   import axios from 'axios'
   import gradeObj from '../../js/grade.js'
-  axios.defaults.headers['Content-Type'] = 'application/x-www-form-urlencoded'
   const qs = require('querystring')
-  let test = {
+
+  axios.defaults.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+  let gradeTest = {
     avg: {
       required: {},
       all: {}
@@ -52,12 +92,38 @@
       "mu-bottom-nav-item": bottomNavItem,
       "mu-tabs": tabs,
       "mu-tab": tab,
-      "my-grade": gradeItem
+      "my-grade": gradeItem,
+      "mu-dialog": dialog,
+      "mu-flat-button": flatButton,
+      "mu-raised-button": raisedButton,
+      "mu-text-field": textField
     },
     methods: {
-      selectedGrade(data, e) {
-        console.log(e);
-        console.log(data)
+      getUid(val) {
+        this.valid.uid = '';
+        this.params.uid = val;
+      },
+      getPassword(val) {
+        this.valid.password = '';
+        this.params.password = val;
+      },
+      login() {
+        if (!this.params.uid || isNaN(this.params.uid)) {
+          this.valid.uid = "学号必填且必须是数字"
+          return
+        }
+
+        if (!this.params.password) {
+          this.valid.password = "密码必填"
+          return
+        }
+
+        this.getGrade();
+        
+      },
+      closeCal() {
+        this.dialogCal = false;
+        this.errorLog = false;
       },
       handleChange(val) {
         this.bottomData = val
@@ -119,20 +185,24 @@
           .then(function (response) {
             let res = response.data;
             if (res.status) {
+              _this.isLogin = true;              
               _this.grade = gradeObj.cal([res.data])[0];
-              console.log(res.data);
               _this.check.gpa = 1;
             } else {
+              _this.errorLog = true;
+              _this.errorText = res.msg;
               console.log(res.msg);
             }
           })
           .catch(function (response) {
-            // console.log(error);
+            _this.errorLog = true;
+            _this.errorText = response.message;
             console.log(response.message);
           });
       },
-      calculation() {
 
+      //计算成绩/绩点
+      calculation() {
         let all = {
           gpa: 0,
           credit: 0,
@@ -148,14 +218,21 @@
           for (let i = 0; i < this.notPass.length; i++) {
             all = this.calCount(this.notPass[i], all);
           }
-
+        }else if (this.activeTab == 2) {
+          for (let i = 0; i < this.notPass.length; i++) {
+            all = this.calCount(this.notPass[i], all);
+          }
         }
 
         this.avg = all;
         this.avg.gpa = (all.gpa / all.credit).toFixed(3);
         this.avg.grade = (all.grade / all.credit).toFixed(3);
+
+        this.dialogCal = true;
         console.log(this.avg);
       },
+
+      //计算统计（计算前统计总分）
       calCount(arr, all) {
         arr.grades.map((item, index) => {
           if (item && item.selected) {
@@ -167,6 +244,8 @@
         })
         return all;
       },
+
+      //选择所有课程（不包含不及格）
       chooseAll() {
         if (this.activeTab == 0) {
           this.grade.grades = this.grade.grades.map((item, index) => {
@@ -182,6 +261,8 @@
           }
         }
       },
+
+      //选择所有的必修课程（不包含不及格课程）
       chooseRequire() {
         if (this.activeTab == 0) {
           this.grade.grades = this.grade.grades.map((item, index) => {
@@ -206,34 +287,48 @@
         }
 
       },
+
+      //清除所有已选项
       clear() {
         this.grade.grades = this.grade.grades.map((item, index) => {
           item.selected = false
           return item
         })
-        for (let i = 0; i < this.gradeAll.length; i++) {
-          this.gradeAll[i].grades = this.gradeAll[i].grades.map((item, index) => {
-            item.selected = false
-            return item
-          })
+
+        if (this.check.notPass) {
+          for (let i = 0; i < this.gradeAll.length; i++) {
+            this.gradeAll[i].grades = this.gradeAll[i].grades.map((item, index) => {
+              item.selected = false
+              return item
+            })
+          }
+          for (let i = 0; i < this.notPass.length; i++) {
+            this.notPass[i].grades = this.notPass[i].grades.map((item, index) => {
+              item.selected = false
+              return item
+            })
+          }
         }
-        for (let i = 0; i < this.notPass.length; i++) {
-          this.notPass[i].grades = this.notPass[i].grades.map((item, index) => {
-            item.selected = false
-            return item
-          })
-        }
+
       }
     },
     data() {
       return {
-        bottomData: 'movies',
+        valid: {
+          uid: '',
+          password: ''
+        },
+        isLogin: false,
+        bottomData: 'cal',
         activeTab: "0",
         gradeAll: {},
-        grade: test,
+        grade: gradeTest,
+        dialogCal: false,
+        errorText: "",
+        errorLog: false,
         notPass: [
-          test,
-          test
+          gradeTest,
+          gradeTest
         ],
         check: {
           gpa: 0,
@@ -241,8 +336,6 @@
           notPass: 0
         },
         params: {
-          "uid": "2014141463233",
-          "password": "091925"
         },
         avg: {
           gpa: 0,
@@ -253,76 +346,11 @@
       }
     },
     mounted() {
-      this.getGrade()
     }
   }
 
 </script>
 
 <style lang="less">
-  #grade {
-    .grade-tabs {
-      background-color: transparent;
-      color: rgba(0, 0, 0, 0.87);
-    }
-    .mu-tab-link-highlight {
-      background: #03a9f4;
-    }
-    .grade-tabs .mu-tab-link {
-      color: rgba(0, 0, 0, 0.54);
-    }
-    .grade-tabs .mu-tab-active {
-      color: #03a9f4;
-    }
-    .mu-card {
-      margin-top: 10px;
-      margin-bottom: 20px;
-    }
-    .mu-card-title-container {
-      text-align: center;
-      background: #03a9f4;
-    }
-    .mu-card-title-container * {
-      color: #fff;
-    }
-    .mu-card-text {
-      padding: 0;
-    }
-    .grade-head {
-      color: #333;
-      font-weight: bold;
-      background: #03a9f4;
-      color: #fff;
-    }
-    .grade-head>div {
-      height: 30px;
-    }
-    .grade-head>div>div {
-      width: 50%;
-      text-align: center;
-    }
-    .left {
-      float: left;
-    }
-    .right {
-      float: right;
-    }
-    h1 {
-      text-align: center;
-    }
-    .bottom {
-      // padding-left:256px;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-    }
-    td,
-    th {
-      white-space: normal;
-      padding-left: 0;
-      padding-right: 0;
-      text-align: center;
-    }
-  }
+
 </style>
