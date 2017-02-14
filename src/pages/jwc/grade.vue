@@ -1,31 +1,36 @@
 <template>
-    <div id="grade">
-        <div>
-         <mu-tabs class="grade-tabs" :value="activeTab" @change="switchTab">
-            <mu-tab value="0" title="本学期成绩"/>
-            <mu-tab value="1" title="所有成绩" @click="getGradeAll"/>
-            <mu-tab value="2" title="不及格成绩" @click="getNotPass"/>
-          </mu-tabs>
+    <div>
+        <div id="login">
+            
         </div>
-        
-        <my-grade v-if="activeTab==0" :isHead=true :grade="grade" title="本学期成绩" ></my-grade>
+        <div id="grade">
+            <div>
+             <mu-tabs class="grade-tabs" :value="activeTab" @change="switchTab">
+                <mu-tab value="0" title="本学期成绩"/>
+                <mu-tab value="1" title="所有成绩" @click="getGradeAll"/>
+                <mu-tab value="2" title="不及格成绩" @click="getNotPass"/>
+              </mu-tabs>
+            </div>
+            
+            <my-grade v-show="activeTab==0" :isHead=true :grade="grade" title="本学期成绩" ></my-grade>
 
-        <my-grade v-if="activeTab==1" :isHead=true :grade="grade" :title="grade.grades[0].term_name"  v-for="grade in gradeAll" ></my-grade>
+            <my-grade v-show="activeTab==1" :isHead=true :grade="grade" :title="grade.grades[0].term_name"  v-for="grade in gradeAll" ></my-grade>
 
-        <my-grade v-if="activeTab!=0" :isHead=false :grade="notPass[0]" title="尚不及格" ></my-grade>
+            <my-grade v-show="activeTab!=0" :isHead=false :grade="notPass[0]" title="尚不及格" ></my-grade>
 
-        <my-grade v-if="activeTab!=0" :isHead=false :grade="notPass[1]" title="曾不及格" ></my-grade>
+            <my-grade v-show="activeTab!=0" :isHead=false :grade="notPass[1]" title="曾不及格" ></my-grade>
 
-        
-         <mu-bottom-nav class="bottom" :value="bottomData" :shift=true @change="handleChange">
-          <mu-bottom-nav-item value="movies" title="Movies" icon="ondemand_video"/>
-          <mu-bottom-nav-item value="music" title="Music" icon="music_note"/>
-          <mu-bottom-nav-item value="books" title="Books" icon="books"/>
-          <mu-bottom-nav-item value="pictures" title="Pictures" icon="photo"/>
-        </mu-bottom-nav>
+            
+             <mu-bottom-nav class="bottom" :value="bottomData" :shift=true @change="handleChange">
+              <mu-bottom-nav-item value="movies" title="计算" @click.native="calculation" icon="assignment_turned_in"/>
+              <mu-bottom-nav-item value="music" title="必修" @click.native="chooseRequire"  icon="class"/>
+              <mu-bottom-nav-item value="books" title="全选" @click.native="chooseAll" icon="select_all"/>
+              <mu-bottom-nav-item value="pictures" title="清空" @click.native="clear" icon="delete_forever"/>
+            </mu-bottom-nav>
+        </div>
     </div>
+    
 </template>
-
 <script>
 import {tabs,tab} from "muse-components/tabs"
 import {bottomNav,bottomNavItem} from "muse-components/bottomNav"
@@ -115,7 +120,7 @@ let test={
                     let  res=response.data;
                     if(res.status){
                         _this.grade=gradeObj.cal([res.data])[0];
-                        console.log(_this.grade);
+                        console.log(res.data);
                         _this.check.gpa=1;
                     }else{
                         console.log(res.msg);
@@ -125,6 +130,99 @@ let test={
                   // console.log(error);
                   console.log(response.message);
                 });
+            },
+            calculation(){
+                
+                let all={
+                    gpa:0,
+                    credit:0,
+                    grade:0,
+                    count:0
+                }
+                if(this.activeTab==0){
+                    all=this.calCount(this.grade,all)
+                }else if (this.activeTab==1) {
+                    for (let i=0; i < this.gradeAll.length; i++) {
+                        all=this.calCount(this.gradeAll[i],all);
+                    }
+                    for (let i=0; i < this.notPass.length; i++) {
+                        all=this.calCount(this.notPass[i],all);
+                    }
+
+                }
+                
+                this.avg=all;
+                this.avg.gpa=(all.gpa/all.credit).toFixed(3);
+                this.avg.grade=(all.grade/all.credit).toFixed(3);
+                console.log(this.avg);
+            },
+            calCount(arr,all){
+                arr.grades.map((item,index) => {
+                    if(item && item.selected){
+                        all.gpa+=item.gpa*item.credit;
+                        all.credit+=item.credit;
+                        all.grade+=item.gradeCal*item.credit;;
+                        all.count++;
+                    }
+                })
+                return all;
+            },
+            chooseAll(){
+                if(this.activeTab==0){
+                    this.grade.grades=this.grade.grades.map((item,index) => {
+                            item.selected=true
+                        return item
+                    })
+                }else if(this.activeTab==1){
+                    for (let i=0; i < this.gradeAll.length; i++) {
+                        this.gradeAll[i].grades=this.gradeAll[i].grades.map((item,index) => {
+                            item.selected=true
+                        return item
+                    })
+                    }
+                }
+            },
+            chooseRequire(){
+                if(this.activeTab==0){
+                    this.grade.grades=this.grade.grades.map((item,index) => {
+                        if(item && item.course_type && item.course_type=="必修"){
+                            item.selected=true
+                        }else{
+                            item.selected=false
+                        }
+                        return item
+                    })
+                }else if(this.activeTab==1){
+                    for (let i=0; i < this.gradeAll.length; i++) {
+                        this.gradeAll[i].grades=this.gradeAll[i].grades.map((item,index) => {
+                        if(item && item.course_type && item.course_type=="必修"){
+                            item.selected=true
+                        }else{
+                            item.selected=false
+                        }
+                        return item
+                    })
+                    }
+                }
+                
+            },
+            clear(){
+                this.grade.grades=this.grade.grades.map((item,index) => {
+                        item.selected=false
+                    return item
+                })
+                for (let i=0; i < this.gradeAll.length; i++) {
+                    this.gradeAll[i].grades=this.gradeAll[i].grades.map((item,index) => {
+                        item.selected=false
+                        return item
+                    })
+                }
+                for (let i=0; i < this.notPass.length; i++) {
+                    this.notPass[i].grades=this.notPass[i].grades.map((item,index) => {
+                        item.selected=false
+                        return item
+                    })
+                }
             }
         },
         data (){
@@ -145,6 +243,12 @@ let test={
                 params:{
                     "uid":"2014141463233",
                     "password":"091925"
+                },
+                avg:{
+                    gpa:0,
+                    credit:0,
+                    grade:0,
+                    count:0
                 }
             }
         },

@@ -1,8 +1,8 @@
 {
-  "name": "vue2spa",
+  "name": "scugpa",
   "version": "1.0.0",
-  "description": "A Vue.js project",
-  "author": "xsf <416175716@qq.com>",
+  "description": "scu gpa",
+  "author": "mohuishou <1@lailin.xyz>",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",

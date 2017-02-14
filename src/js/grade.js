@@ -3,7 +3,10 @@ grade.cal = function(data) {
   let grade = [];
 
   for (let k = 0; k < data.length; k++) {
-    if(!data[k]) continue;
+    if(!data[k]) {
+      data.splice(k,1);
+      continue;
+    }
     let sum = {
       all: {
         grade: 0,
@@ -31,6 +34,10 @@ grade.cal = function(data) {
     let t = [];
     for (let i = 0; i < data[k].length; i++) {
       let d = data[k][i];
+      if(!d.course_id){
+        continue;
+      }
+      d.selected=false;
       d.gradeCal = lv2grade(d.grade);
       d.gpa = grade2gpa(d.gradeCal);
       d.credit = parseFloat(d.credit);
@@ -47,6 +54,7 @@ grade.cal = function(data) {
     if (!t[0]) {
       return grade;
     }
+    if(k==2)console.log(sum);
     //计算平均分保留两位小数
     avg.all.gpa = (sum.all.gpa / sum.all.credit).toFixed(3);
     avg.all.grade = (sum.all.grade / sum.all.credit).toFixed(3);
@@ -59,11 +67,9 @@ grade.cal = function(data) {
     grade[k].grades = t;
 
   }
-  console.log(grade);
 
   return grade;
 }
-
 //分数绩点转换
 function grade2gpa(grade) {
   var gpa = 0;
@@ -109,9 +115,11 @@ function lv2grade(g) {
       g = 75;
       break;
     case "通过":
+    case "及格":
       g = 60;
       break;
     case "未通过":
+    case "不及格":
       g = 0;
       break;
   }

@@ -41,7 +41,6 @@
            this.routes = this.$router.options.routes
            window.addEventListener('resize', this.handleResize)
            window.addEventListener('hashchange', () => {
-             this.setTitle()
            })
          },
         methods: {

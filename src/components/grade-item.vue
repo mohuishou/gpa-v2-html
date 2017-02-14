@@ -13,7 +13,7 @@
                         <div class="right">全部平均分：<span>{{grade.avg.all.grade}}</span></div>
                     </div>
                 </div>
-                 <mu-table class="t-1" :enableSelectAll=true :multiSelectable=true >
+                 <mu-table class="t-1"  @rowSelection="handleSelect" :enableSelectAll=true :multiSelectable=true >
                       <colgroup>
                           <col width="40">
                           <col width="120">
@@ -32,7 +32,10 @@
                      </mu-tr>
                    </mu-thead>
                    <mu-tbody>
-                     <mu-tr  v-if="g.course_name" v-for="g in grade.grades">
+                     <mu-tr  v-if="g.course_name" v-for="g in grade.grades" :gpa-type="g.course_type == '必修' ? 1 : 0" :selected="g.selected">
+                      <input type="hidden" class="grade" :value="g.gradeCal">
+                      <input type="hidden" class="credit" :value="g.credit">
+                      <input type="hidden" class="gpa" :value="g.gpa">
                        <mu-td>{{g.course_name}}</mu-td>
                        <mu-td>{{g.grade}}</mu-td>
                        <mu-td>{{g.gpa}}</mu-td>
@@ -65,6 +68,14 @@
           },
           title:{
             required:true
+          }
+        },
+        methods:{
+          handleSelect (rowIndexs) {
+            this.grade.grades = this.grade.grades.map((item, index) => {
+              item.selected = rowIndexs.indexOf(index) !== -1
+              return item
+            })
           }
         },
         components:{
