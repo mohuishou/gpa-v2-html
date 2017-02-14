@@ -68,7 +68,8 @@
   
   @media (min-width: 480px) {
     .content {
-      // padding-top: 64px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
   }
   

@@ -1,14 +1,19 @@
 <template>
   <div>
     <div v-if="!isLogin" id="login">
-      <div>
+      <div class="main">
         <h2>四川大学绩点/平均分一键计算</h2>
         <mu-text-field label="学号" hintText="请输入学号" :errorText="valid.uid" fullWidth labelFloat @input="getUid" /><br/>
         <mu-text-field label="密码" hintText="请输入教务处密码" :errorText="valid.password" fullWidth type="password" labelFloat @input="getPassword"
         /><br/>
         <mu-raised-button label="登录" @click="login" class="demo-raised-button" fullWidth primary/>
       </div>
+
+      <div id="footer">
+        <a target="_blank" href="http://lailin.xyz">&#xa9; Mohuishou</a><a target="_blank" href="http://fyscu.com">	&#x261b; 飞扬研发实验室</a>
+      </div>
     </div>
+
     <div v-if="isLogin" id="grade">
       <div>
         <mu-tabs class="grade-tabs" :value="activeTab" @change="switchTab">
