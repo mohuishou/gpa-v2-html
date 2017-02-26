@@ -63,6 +63,15 @@
       </p>
       <mu-flat-button slot="actions" primary @click="closeCal" label="确定" />
     </mu-dialog>
+
+    <mu-dialog :open="isLoading" dialogClass="loading">
+      <mu-circal :size="60" color="#fff" /> 
+    </mu-dialog>
+
+    <div class="loading" v-show="isLoading" >
+            
+    </div>
+    
   </div>
 
 </template>
@@ -77,7 +86,7 @@
   import flatButton from "muse-components/flatButton"
   import raisedButton from "muse-components/raisedButton"
   import textField from "muse-components/textField"
-
+  import circularProgress from "muse-components/circularProgress"
 
   import axios from 'axios'
   import gradeObj from '../../js/grade.js'
@@ -101,7 +110,8 @@
       "mu-dialog": dialog,
       "mu-flat-button": flatButton,
       "mu-raised-button": raisedButton,
-      "mu-text-field": textField
+      "mu-text-field": textField,
+      "mu-circal":circularProgress
     },
     methods: {
       getUid(val) {
@@ -140,6 +150,7 @@
         if (this.check.gpaAll != 0) {
           return
         }
+        this.isLoading=true; 
         let _this = this;
         let url = "http://120.26.53.243:6627/gpa/all"
         axios.post(url, qs.stringify(this.params))
@@ -153,16 +164,19 @@
             } else {
               console.log(res.msg);
             }
+            _this.isLoading=false;
           })
           .catch(function (response) {
             // console.log(error);
             console.log(response.message);
-          });
+          })
+
       },
       getNotPass() {
         if (this.check.notPass != 0) {
           return
         }
+        this.isLoading=true;     
         let _this = this;
         let url = "http://120.26.53.243:6627/gpa/not-pass";
         axios.post(url, qs.stringify(this.params))
@@ -174,16 +188,18 @@
             } else {
               console.log(res.msg);
             }
+            _this.isLoading=false;
           })
           .catch(function (response) {
             // console.log(error);
             console.log(response.message);
-          });
+          })
       },
       getGrade() {
         if (this.check.gpa != 0) {
           return
         }
+        this.isLoading=true;        
         let _this = this;
         let url = "http://120.26.53.243:6627/gpa";
         axios.post(url, qs.stringify(this.params))
@@ -198,12 +214,14 @@
               _this.errorText = res.msg;
               console.log(res.msg);
             }
+            _this.isLoading=false;
           })
           .catch(function (response) {
             _this.errorLog = true;
             _this.errorText = response.message;
             console.log(response.message);
-          });
+          })
+      
       },
 
       //计算成绩/绩点
@@ -323,6 +341,7 @@
           uid: '',
           password: ''
         },
+        isLoading: false,
         isLogin: false,
         bottomData: 'cal',
         activeTab: "0",
