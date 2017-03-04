@@ -32,7 +32,7 @@
       <my-grade v-show="activeTab!=0" :isHead=false :grade="notPass[1]" title="曾不及格"></my-grade>
 
 
-      <mu-bottom-nav class="bottom" :value="bottomData" :shift=true @change="handleChange">
+      <mu-bottom-nav class="bottom" :value="bottomData" @change="handleChange">
         <mu-bottom-nav-item value="cal" title="计算" @click.native="calculation" icon="assignment_turned_in" />
         <mu-bottom-nav-item value="required" title="必修" @click.native="chooseRequire" icon="class" />
         <mu-bottom-nav-item value="all" title="全选" @click.native="chooseAll" icon="select_all" />
