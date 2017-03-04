@@ -33,10 +33,10 @@
 
 
       <mu-bottom-nav class="bottom" :value="bottomData" @change="handleChange">
-        <mu-bottom-nav-item value="cal" title="计算" @click.native="calculation" icon="assignment_turned_in" />
-        <mu-bottom-nav-item value="required" title="必修" @click.native="chooseRequire" icon="class" />
-        <mu-bottom-nav-item value="all" title="全选" @click.native="chooseAll" icon="select_all" />
-        <mu-bottom-nav-item value="clear" title="清空" @click.native="clear" icon="delete_forever" />
+        <mu-bottom-nav-item value="cal" title="计算" @click.native="calculation" icon=":icon-CombinedShape" iconClass="iconfont" />
+        <mu-bottom-nav-item value="required" title="必修" @click.native="chooseRequire" icon=":icon-zhuanyebixiuke" iconClass="iconfont"/>
+        <mu-bottom-nav-item value="all" title="全选" @click.native="chooseAll" icon=":icon-quanxuan" iconClass="iconfont" />
+        <mu-bottom-nav-item value="clear" title="清空" @click.native="clear" icon=":icon-qingkong" iconClass="iconfont" />
       </mu-bottom-nav>
     </div>
     <mu-dialog :open="dialogCal" title="计算结果" @close="closeCal">

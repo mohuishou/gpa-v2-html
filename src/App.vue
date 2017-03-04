@@ -4,7 +4,7 @@
 
     <div id="header">
       <appBar :zDepth="0" title="四川大学成绩/绩点一键计算" class="appbar">
-        <iconButton icon='account_circle' slot="right" />
+        <iconButton icon=':icon-help' iconClass="iconfont" slot="right" />
       </appBar>
 
     </div>
@@ -21,7 +21,7 @@
   </div>
 </template>
 <script>
-  import './css/icon-fonts.css'
+  import './css/iconfont.css'
   import appBar from "muse-components/appBar"
   import iconButton from "muse-components/iconButton"
   export default {
