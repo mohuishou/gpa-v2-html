@@ -37,8 +37,16 @@
         <mu-bottom-nav-item value="required" title="必修" @click.native="chooseRequire" icon=":icon-zhuanyebixiuke" iconClass="iconfont"/>
         <mu-bottom-nav-item value="all" title="全选" @click.native="chooseAll" icon=":icon-quanxuan" iconClass="iconfont" />
         <mu-bottom-nav-item value="clear" title="清空" @click.native="clear" icon=":icon-qingkong" iconClass="iconfont" />
+        <mu-bottom-nav-item value="clear" title="导出" @click.native="clear" icon=":icon-qingkong" iconClass="iconfont" />
       </mu-bottom-nav>
     </div>
+
+    <mu-dialog :open="exportCSVShow" title="导出">
+      这是一个简单的弹出框
+      <mu-flat-button slot="actions" @click="close" primary label="取消"/>
+      <mu-flat-button slot="actions" primary @click="close" label="确定"/>
+    </mu-dialog>
+
     <mu-dialog :open="dialogCal" title="计算结果" @close="closeCal">
       <div id="cal-result">
         <div class="result">
@@ -341,6 +349,7 @@
           uid: '',
           password: ''
         },
+        exportCSVShow:false,
         isLoading: false,
         isLogin: false,
         bottomData: 'cal',
@@ -376,5 +385,7 @@
 </script>
 
 <style lang="less">
-
+  .iconfont{
+    font-size: 17px;
+  }
 </style>
