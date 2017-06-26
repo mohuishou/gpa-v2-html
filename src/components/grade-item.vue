@@ -3,7 +3,7 @@
   <mu-card>
     <mu-card-header :title="title">
       <template slot="default">
-        <a v-if="grade.grades.length > 0" :download="`${title}.csv`" :href="exportCSV"> 导出CSV </a>
+        <!--<a v-if="isShowCSV == true" :download="`${title}.csv`" :href="exportCSV"> 导出CSV </a>-->
       </template>
     </mu-card-header>
     <mu-card-text>
@@ -136,8 +136,13 @@ export default {
       let blob = new Blob([cvs], { type: 'text/csv' }); //new way  
       let csvUrl = URL.createObjectURL(blob);
       return csvUrl
+    },
+    isShowCSV(){
+      grade.grades.length > 0
+      return false
     }
   },
+  
   methods: {
     handleSelect(rowIndexs) {
       this.grade.grades = this.grade.grades.map((item, index) => {

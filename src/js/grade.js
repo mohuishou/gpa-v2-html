@@ -41,6 +41,10 @@ grade.cal = function (data) {
       d.gpa = grade2gpa(d.gradeCal);
       d.credit = parseFloat(d.credit);
       t.push(d);
+
+      if (d.grade.trim() === ""){
+        continue
+      }
       if (d.course_type == "必修") {
         sum.required.grade += d.gradeCal * d.credit;
         sum.required.credit += d.credit;
