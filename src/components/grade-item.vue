@@ -164,7 +164,7 @@ export default {
     "mu-card-text": cardText
   },
   mounted() {
-
+    
   }
 
 

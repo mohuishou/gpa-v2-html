@@ -94,6 +94,9 @@ import axios from 'axios'
 import gradeObj from '../../js/grade.js'
 const qs = require('querystring')
 
+const skey = "xrcytjhndsgfysavasdvahfvwj,ehbfkjb"
+const encryptor = require('simple-encryptor')(skey);
+
 axios.defaults.headers['Content-Type'] = 'application/x-www-form-urlencoded'
 let gradeTest = {
   avg: {
@@ -114,6 +117,13 @@ export default {
     "mu-raised-button": raisedButton,
     "mu-text-field": textField,
     "mu-circal": circularProgress
+  },
+  computed: {
+    isWechat() {
+      let ua = navigator.userAgent.toLowerCase();
+      if (ua.match(/MicroMessenger/i) == "micromessenger") return true
+      return false
+    }
   },
   methods: {
     getUid(val) {
@@ -211,16 +221,22 @@ export default {
             _this.isLogin = true;
             _this.grade = gradeObj.cal([res.data])[0];
             _this.check.gpa = 1;
+            if (_this.isWechat) {
+              //在微信中打开，保存用户名和密码
+              localStorage.uid = _this.encrypt(_this.params.uid)
+              localStorage.password = _this.encrypt(_this.params.password)
+            }
           } else {
+            localStorage.clear()
             _this.errorLog = true;
             _this.errorText = res.msg;
-            console.log(res.msg);
           }
           _this.isLoading = false;
         })
         .catch(function (response) {
           _this.errorLog = true;
           _this.errorText = response.message;
+          _this.isLoading = false;
           console.log(response.message);
         })
 
@@ -335,10 +351,21 @@ export default {
         }
       }
 
+    },
+
+    encrypt(text) {
+      return encryptor.encrypt(text);
+    },
+    decrypt(hex) {
+
+      return encryptor.decrypt(hex);
     }
+
   },
   data() {
     return {
+      key: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      iv: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
       valid: {
         uid: '',
         password: ''
@@ -373,6 +400,18 @@ export default {
     }
   },
   mounted() {
+    let ua = navigator.userAgent.toLowerCase();
+    if (ua.match(/MicroMessenger/i) == "micromessenger") {
+      //在微信中打开
+      if (localStorage.uid) {
+        this.params.uid = this.decrypt(localStorage.uid)
+        if (localStorage.password) {
+          this.params.password = this.decrypt(localStorage.password)
+          this.getGrade()
+        }
+      }
+
+    }
   }
 }
 
