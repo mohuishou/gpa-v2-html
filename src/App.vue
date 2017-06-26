@@ -4,7 +4,7 @@
   
     <div id="header">
       <appBar :zDepth="0" title="四川大学成绩/绩点一键计算" class="appbar">
-        <iconButton icon=':icon-help' iconClass="iconfont" slot="right" />
+        <iconButton @click="logout" icon=':icon-logout' iconClass="iconfont" slot="right"></iconButton>
       </appBar>
   
     </div>
@@ -20,7 +20,7 @@
   </div>
 </template>
 <script>
-import './css/iconfont.css'
+// import './css/iconfont.css'
 import appBar from "muse-components/appBar"
 import iconButton from "muse-components/iconButton"
 
@@ -37,14 +37,17 @@ export default {
       desktop: desktop,
     }
   },
+  methods: {
+    logout() {
+      localStorage.clear()
+      location.reload()
+    }
+  },
   mounted() {
     this.routes = this.$router.options.routes
     window.addEventListener('resize', this.handleResize)
     window.addEventListener('hashchange', () => {
     })
-  },
-  methods: {
-
   }
 
 }
