@@ -6,7 +6,7 @@ import VueRouter from 'vue-router'
 Vue.config.debug = true
 Vue.use(VueRouter);
 
-import Grade from '../pages/jwc/grade.vue'
+import Grade from '../components/grade/Grade.vue'
 
 export default new VueRouter({
   mode: 'hash',

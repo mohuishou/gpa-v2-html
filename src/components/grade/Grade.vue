@@ -78,22 +78,27 @@
   </div>
 </template>
 <script>
-import "../../css/grade.less"
+// 自定义组件
+import "less/grade.less"
+import gradeItem from "./GradeItem.vue"
 
-
+//框架组件
 import { tabs, tab } from "muse-components/tabs"
 import { bottomNav, bottomNavItem } from "muse-components/bottomNav"
-import gradeItem from "../../components/grade-item.vue"
 import dialog from "muse-components/dialog"
 import flatButton from "muse-components/flatButton"
 import raisedButton from "muse-components/raisedButton"
 import textField from "muse-components/textField"
 import circularProgress from "muse-components/circularProgress"
 
+//配置文件
+import config from 'config/grade'
+
 import axios from 'axios'
-import gradeObj from '../../js/grade.js'
+import gradeObj from 'js/grade.js'
 const qs = require('querystring')
 
+//加密
 const skey = "xrcytjhndsgfysavasdvahfvwj,ehbfkjb"
 const encryptor = require('simple-encryptor')(skey);
 
@@ -107,11 +112,12 @@ let gradeTest = {
 }
 export default {
   components: {
+    "my-grade": gradeItem,
+    
     "mu-bottom-nav": bottomNav,
     "mu-bottom-nav-item": bottomNavItem,
     "mu-tabs": tabs,
     "mu-tab": tab,
-    "my-grade": gradeItem,
     "mu-dialog": dialog,
     "mu-flat-button": flatButton,
     "mu-raised-button": raisedButton,
@@ -212,8 +218,19 @@ export default {
         return
       }
       this.isLoading = true;
+
+      // this.$http.post(config.domain +"/gpa",this.params).then(
+      //   resp => {
+
+      //   },
+      //   resp => {
+
+      //   }
+      // )
+
+
       let _this = this;
-      let url = "https://gpa.api.scuplus.cn/gpa";
+      let url = config.domain + "/gpa";
       axios.post(url, qs.stringify(this.params))
         .then(function (response) {
           let res = response.data;
