@@ -102,7 +102,6 @@ const qs = require('querystring')
 const skey = "xrcytjhndsgfysavasdvahfvwj,ehbfkjb"
 const encryptor = require('simple-encryptor')(skey);
 
-axios.defaults.headers['Content-Type'] = 'application/x-www-form-urlencoded'
 let gradeTest = {
   avg: {
     required: {},
@@ -113,7 +112,7 @@ let gradeTest = {
 export default {
   components: {
     "my-grade": gradeItem,
-    
+
     "mu-bottom-nav": bottomNav,
     "mu-bottom-nav-item": bottomNavItem,
     "mu-tabs": tabs,
@@ -124,6 +123,77 @@ export default {
     "mu-text-field": textField,
     "mu-circal": circularProgress
   },
+  data() {
+    let http = axios.create({
+      baseURL: config.domain,
+      timeout: 5000,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    //请求拦截器：显示loding
+    http.interceptors.request.use(conf => {
+      this.isLoading = true
+      conf.data = qs.stringify(conf.data)
+      return conf
+    }, err => {
+      // 对请求错误做些什么
+      return Promise.reject(error);
+    });
+
+    //响应拦截器
+    http.interceptors.response.use(
+      res => {
+        this.isLoading = false
+        if (res.data.status == 0) {
+          this.error(res.data.msg)
+        } else {
+          return res
+        }
+      },
+      err => {
+        this.isLoading = false
+        this.error(err.message)
+      }
+    );
+
+    return {
+      http: http,
+      valid: {
+        uid: '',
+        password: ''
+      },
+      exportCSVShow: false,
+      isLoading: false,
+      isLogin: false,
+      bottomData: 'cal',
+      activeTab: "0",
+      gradeAll: {},
+      grade: gradeTest,
+      dialogCal: false,
+      errorText: "",
+      errorLog: false,
+      notPass: [
+        gradeTest,
+        gradeTest
+      ],
+      check: {
+        gpa: 0,
+        gpaAll: 0,
+        notPass: 0
+      },
+      params: {
+      },
+      avg: {
+        gpa: 0,
+        credit: 0,
+        grade: 0,
+        count: 0
+      }
+    }
+  },
+
   computed: {
     isWechat() {
       let ua = navigator.userAgent.toLowerCase();
@@ -132,6 +202,10 @@ export default {
     }
   },
   methods: {
+    error(msg) {
+      this.errorText = msg
+      this.errorLog = true
+    },
     getUid(val) {
       this.valid.uid = '';
       this.params.uid = val;
@@ -168,95 +242,54 @@ export default {
       if (this.check.gpaAll != 0) {
         return
       }
-      this.isLoading = true;
-      let _this = this;
-      let url = "https://gpa.api.scuplus.cn/gpa/all"
-      axios.post(url, qs.stringify(this.params))
-        .then(function (response) {
-          let res = response.data;
-          if (res.status) {
-            let g = gradeObj.cal(res.data);
-            _this.gradeAll = g.reverse();
-            _this.check.gpaAll = 1;
-            _this.getNotPass()
-          } else {
-            console.log(res.msg);
+
+      this.http.post("/gpa/all", this.params).then(
+        resp => {
+          if (resp.data.status == 1) {
+            let g = gradeObj.cal(resp.data.data);
+            this.gradeAll = g.reverse();
+            this.check.gpaAll = 1;
+            this.getNotPass()
           }
-          _this.isLoading = false;
-        })
-        .catch(function (response) {
-          // console.log(error);
-          console.log(response.message);
-        })
+        }
+      )
+
+     
 
     },
     getNotPass() {
       if (this.check.notPass != 0) {
         return
       }
-      this.isLoading = true;
-      let _this = this;
-      let url = "https://gpa.api.scuplus.cn/gpa/not-pass";
-      axios.post(url, qs.stringify(this.params))
-        .then(function (response) {
-          let res = response.data;
-          if (res.status) {
-            _this.notPass = gradeObj.cal(res.data);
-            _this.check.notPass = 1;
-          } else {
-            console.log(res.msg);
+
+      this.http.post("/gpa/not-pass", this.params).then(
+        resp => {
+          if (resp.data.status == 1) {
+            this.notPass = gradeObj.cal(resp.data.data);
+            this.check.notPass = 1;
           }
-          _this.isLoading = false;
-        })
-        .catch(function (response) {
-          // console.log(error);
-          console.log(response.message);
-        })
+        }
+      )
+
     },
     getGrade() {
       if (this.check.gpa != 0) {
         return
       }
-      this.isLoading = true;
-
-      // this.$http.post(config.domain +"/gpa",this.params).then(
-      //   resp => {
-
-      //   },
-      //   resp => {
-
-      //   }
-      // )
-
-
-      let _this = this;
-      let url = config.domain + "/gpa";
-      axios.post(url, qs.stringify(this.params))
-        .then(function (response) {
-          let res = response.data;
-          if (res.status) {
-            _this.isLogin = true;
-            _this.grade = gradeObj.cal([res.data])[0];
-            _this.check.gpa = 1;
-            if (_this.isWechat) {
+      this.http.post("/gpa", this.params).then(
+        resp => {
+          if (resp.data.status == 1) {
+            this.isLogin = true
+            this.grade = gradeObj.cal([resp.data.data])[0];
+            this.check.gpa = 1;
+            if (this.isWechat) {
               //在微信中打开，保存用户名和密码
-              localStorage.uid = _this.encrypt(_this.params.uid)
-              localStorage.password = _this.encrypt(_this.params.password)
+              localStorage.uid = this.encrypt(this.params.uid)
+              localStorage.password = this.encrypt(this.params.password)
             }
-          } else {
-            localStorage.clear()
-            _this.errorLog = true;
-            _this.errorText = res.msg;
           }
-          _this.isLoading = false;
-        })
-        .catch(function (response) {
-          _this.errorLog = true;
-          _this.errorText = response.message;
-          _this.isLoading = false;
-          console.log(response.message);
-        })
-
+        }
+      )
     },
 
     //计算成绩/绩点
@@ -378,43 +411,6 @@ export default {
       return encryptor.decrypt(hex);
     }
 
-  },
-  data() {
-    return {
-      key: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-      iv: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
-      valid: {
-        uid: '',
-        password: ''
-      },
-      exportCSVShow: false,
-      isLoading: false,
-      isLogin: false,
-      bottomData: 'cal',
-      activeTab: "0",
-      gradeAll: {},
-      grade: gradeTest,
-      dialogCal: false,
-      errorText: "",
-      errorLog: false,
-      notPass: [
-        gradeTest,
-        gradeTest
-      ],
-      check: {
-        gpa: 0,
-        gpaAll: 0,
-        notPass: 0
-      },
-      params: {
-      },
-      avg: {
-        gpa: 0,
-        credit: 0,
-        grade: 0,
-        count: 0
-      }
-    }
   },
   mounted() {
     let ua = navigator.userAgent.toLowerCase();
