@@ -30,21 +30,21 @@
           <col width="40">
           <col width="120">
           <col width="40">
-          <col width="30">
-          <col width="30">
+          <col width="40">
+          <col width="40">
           <col width="50">
         </colgroup>
         <mu-thead>
-          <mu-tr>
-            <mu-th> 课程名</mu-th>
-            <mu-th>分数</mu-th>
-            <mu-th>绩点</mu-th>
-            <mu-th>学分</mu-th>
-            <mu-th>属性</mu-th>
+          <mu-tr class="table-head">
+            <mu-th @click.native="sort('course_name')">课程名<i class="iconfont" :class="iconSort('course_name')" ></i></mu-th>
+            <mu-th @click.native="sort('gradeCal')">分数<i class="iconfont" :class="iconSort('gradeCal')" ></i></mu-th>
+            <mu-th @click.native="sort('gpa')">绩点<i class="iconfont" :class="iconSort('gpa')" ></i></mu-th>
+            <mu-th @click.native="sort('credit')">学分<i class="iconfont" :class="iconSort('credit')" ></i></mu-th>
+            <mu-th @click.native="sort('course_type')">属性<i class="iconfont" :class="iconSort('course_type')" ></i></mu-th>
           </mu-tr>
         </mu-thead>
         <mu-tbody>
-          <mu-tr v-if="g.course_name" v-for="g in grade.grades" :selected="g.selected">
+          <mu-tr v-if="g.course_name" v-for="g in grade.grades" :selected="g.selected" :key="g.id">
             <input type="hidden" class="grade" :value="g.gradeCal">
             <input type="hidden" class="credit" :value="g.credit">
             <input type="hidden" class="gpa" :value="g.gpa">
@@ -86,7 +86,7 @@ export default {
     }
   },
   computed: {
-
+    //导出csv
     exportCSV() {
       let cvs = json2csv({
         data: this.grade.grades,
@@ -137,18 +137,69 @@ export default {
       let csvUrl = URL.createObjectURL(blob);
       return csvUrl
     },
+
+    //是否展示csv
     isShowCSV(){
       grade.grades.length > 0
       return false
     }
   },
+
+  data(){
+    return {
+      modes:{
+        'gradeCal': 0,
+        'gpa': 0,
+        'credit': 0,
+        'course_type': 0,
+        'course_name': 0
+      }
+    }
+  },
   
   methods: {
+    //选择一行
     handleSelect(rowIndexs) {
       this.grade.grades = this.grade.grades.map((item, index) => {
         item.selected = rowIndexs.indexOf(index) !== -1
         return item
       })
+    },
+
+    iconSort(field){
+      let icon = 'icon-sort'
+      switch(this.modes[field]){
+        case 0:
+          icon = 'icon-sort';
+          break;
+        case 1:
+          icon = 'icon-up';
+          break;
+        case -1:
+          icon = 'icon-down';
+          break;
+      }
+      return icon
+    },
+
+    sort(field){
+      this.modes[field] = this.modes[field] == 0 ? 1 : -this.modes[field]
+      this.sortGrades(field,this.modes[field])
+      for(let x in this.modes){
+        if(x != field)this.modes[x]=0;
+      }
+    },
+
+    /**
+     * @param field 字段名
+     * @param mode 模式：1顺序/-1逆序 
+     */
+    sortGrades(field,mode){
+      if (field == 'course_type' || field == 'course_name'){
+        this.grade.grades.sort((a,b)=> mode == 1 ? a[field].localeCompare(b[field]) : b[field].localeCompare(a[field]));
+      }else{
+        this.grade.grades.sort((a,b)=> mode == 1 ? a[field] -b[field] :  b[field] -a[field]);
+      }
     }
   },
   components: {
@@ -162,12 +213,18 @@ export default {
     "mu-card-header": cardHeader,
     "mu-card-title": cardTitle,
     "mu-card-text": cardText
-  },
-  mounted() {
-    
   }
-
-
 }
 
 </script>
+<style lang="less">
+.table-head{
+  th{
+    cursor: pointer;
+  }
+  .iconfont{
+    vertical-align: middle;
+    font-size: 15px;
+  }
+}
+</style>
