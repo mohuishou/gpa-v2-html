@@ -19,25 +19,25 @@
     <div v-if="isLogin" id="grade">
       <div>
         <mu-tabs class="grade-tabs" :value="activeTab" @change="switchTab">
-          <mu-tab value="0" title="本学期成绩" />
-          <mu-tab value="1" title="所有成绩" @click="getGradeAll" />
-          <mu-tab value="2" title="不及格成绩" @click="getNotPass" />
+          <mu-tab value="0" title="本学期成绩"></mu-tab>
+          <mu-tab value="1" title="所有成绩" @click="getGradeAll" ></mu-tab>
+          <mu-tab value="2" title="不及格成绩" @click="getNotPass" ></mu-tab>
         </mu-tabs>
       </div>
   
       <my-grade v-show="activeTab==0" :isHead=true :grade="grade" title="本学期成绩"></my-grade>
   
-      <my-grade v-show="activeTab==1" :isHead=true :grade="grade" :title="grade.grades[0].term_name" v-for="grade in gradeAll"></my-grade>
+      <my-grade v-show="activeTab==1" :isHead=true :grade="grade" :title="grade.grades[0].term_name" v-for="(grade,index) in gradeAll" :key="index"></my-grade>
   
       <my-grade v-show="activeTab!=0" :isHead=false :grade="notPass[0]" title="尚不及格"></my-grade>
   
       <my-grade v-show="activeTab!=0" :isHead=false :grade="notPass[1]" title="曾不及格"></my-grade>
   
       <mu-bottom-nav class="bottom" :value="bottomData" @change="handleChange">
-        <mu-bottom-nav-item value="cal" title="计算" @click.native="calculation" icon=":icon-CombinedShape" iconClass="iconfont" />
-        <mu-bottom-nav-item value="required" title="必修" @click.native="chooseRequire" icon=":icon-zhuanyebixiuke" iconClass="iconfont" />
-        <mu-bottom-nav-item value="all" title="全选" @click.native="chooseAll" icon=":icon-quanxuan" iconClass="iconfont" />
-        <mu-bottom-nav-item value="clear" title="清空" @click.native="clear" icon=":icon-qingkong" iconClass="iconfont" />
+        <mu-bottom-nav-item value="cal" title="计算" @click.native="calculation" icon=":icon-CombinedShape" iconClass="iconfont" ></mu-bottom-nav-item>
+        <mu-bottom-nav-item value="required" title="必修" @click.native="chooseRequire" icon=":icon-zhuanyebixiuke" iconClass="iconfont" ></mu-bottom-nav-item>
+        <mu-bottom-nav-item value="all" title="全选" @click.native="chooseAll" icon=":icon-quanxuan" iconClass="iconfont" ></mu-bottom-nav-item>
+        <mu-bottom-nav-item value="clear" title="清空" @click.native="clear" icon=":icon-qingkong" iconClass="iconfont" ></mu-bottom-nav-item>
         <!--<mu-bottom-nav-item value="clear" title="导出" @click.native="clear" icon=":icon-qingkong" iconClass="iconfont" />-->
       </mu-bottom-nav>
     </div>
@@ -55,7 +55,7 @@
           <p>平均成绩=∑(课程成绩*课程学分) / 课程总学分</p>
         </div>
       </div>
-      <mu-flat-button slot="actions" primary @click="closeCal" label="确定" />
+      <mu-flat-button slot="actions" primary @click="closeCal" label="确定" ></mu-flat-button>
     </mu-dialog>
   
     <mu-dialog :open="errorLog" title="提示" @close="closeCal">
@@ -64,11 +64,11 @@
       <p style="background: #eee;padding: 15px;">
         注：如果遇到网络问题，请先测试能否直接打开教务处网站
       </p>
-      <mu-flat-button slot="actions" primary @click="closeCal" label="确定" />
+      <mu-flat-button slot="actions" primary @click="closeCal" label="确定"></mu-flat-button>
     </mu-dialog>
   
     <mu-dialog :open="isLoading" dialogClass="loading">
-      <mu-circal :size="60" color="#fff" />
+      <mu-circal :size="60" color="#fff"></mu-circal>
     </mu-dialog>
   
     <div class="loading" v-show="isLoading">
@@ -242,7 +242,6 @@ export default {
       if (this.check.gpaAll != 0) {
         return
       }
-
       this.http.post("/gpa/all", this.params).then(
         resp => {
           if (resp.data.status == 1) {
@@ -253,15 +252,11 @@ export default {
           }
         }
       )
-
-     
-
     },
     getNotPass() {
       if (this.check.notPass != 0) {
         return
       }
-
       this.http.post("/gpa/not-pass", this.params).then(
         resp => {
           if (resp.data.status == 1) {
