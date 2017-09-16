@@ -9,39 +9,39 @@
         <br/>
         <mu-raised-button label="登录" @click="login" class="demo-raised-button" fullWidth primary></mu-raised-button>
       </div>
-  
+
       <div id="footer">
         <a target="_blank" href="http://lailin.xyz">&#xa9; Mohuishou</a>
         <a target="_blank" href="http://fyscu.com"> &#x261b; 飞扬研发实验室</a>
       </div>
     </div>
-  
+
     <div v-if="isLogin" id="grade">
       <div>
         <mu-tabs class="grade-tabs" :value="activeTab" @change="switchTab">
           <mu-tab value="0" title="本学期成绩"></mu-tab>
-          <mu-tab value="1" title="所有成绩" @click="getGradeAll" ></mu-tab>
-          <mu-tab value="2" title="不及格成绩" @click="getNotPass" ></mu-tab>
+          <mu-tab value="1" title="所有成绩" @click="getGradeAll"></mu-tab>
+          <mu-tab value="2" title="不及格成绩" @click="getNotPass"></mu-tab>
         </mu-tabs>
       </div>
-  
+
       <my-grade v-show="activeTab==0" :isHead=true :grade="grade" title="本学期成绩"></my-grade>
-  
+
       <my-grade v-show="activeTab==1" :isHead=true :grade="grade" :title="grade.grades[0].term_name" v-for="(grade,index) in gradeAll" :key="index"></my-grade>
-  
+
       <my-grade v-show="activeTab!=0" :isHead=false :grade="notPass[0]" title="尚不及格"></my-grade>
-  
+
       <my-grade v-show="activeTab!=0" :isHead=false :grade="notPass[1]" title="曾不及格"></my-grade>
-  
+
       <mu-bottom-nav class="bottom" :value="bottomData" @change="handleChange">
-        <mu-bottom-nav-item value="cal" title="计算" @click.native="calculation" icon=":icon-CombinedShape" iconClass="iconfont" ></mu-bottom-nav-item>
-        <mu-bottom-nav-item value="required" title="必修" @click.native="chooseRequire" icon=":icon-zhuanyebixiuke" iconClass="iconfont" ></mu-bottom-nav-item>
-        <mu-bottom-nav-item value="all" title="全选" @click.native="chooseAll" icon=":icon-quanxuan" iconClass="iconfont" ></mu-bottom-nav-item>
-        <mu-bottom-nav-item value="clear" title="清空" @click.native="clear" icon=":icon-qingkong" iconClass="iconfont" ></mu-bottom-nav-item>
+        <mu-bottom-nav-item value="cal" title="计算" @click.native="calculation" icon=":icon-CombinedShape" iconClass="iconfont"></mu-bottom-nav-item>
+        <mu-bottom-nav-item value="required" title="必修" @click.native="chooseRequire" icon=":icon-zhuanyebixiuke" iconClass="iconfont"></mu-bottom-nav-item>
+        <mu-bottom-nav-item value="all" title="全选" @click.native="chooseAll" icon=":icon-quanxuan" iconClass="iconfont"></mu-bottom-nav-item>
+        <mu-bottom-nav-item value="clear" title="清空" @click.native="clear" icon=":icon-qingkong" iconClass="iconfont"></mu-bottom-nav-item>
         <!--<mu-bottom-nav-item value="clear" title="导出" @click.native="clear" icon=":icon-qingkong" iconClass="iconfont" />-->
       </mu-bottom-nav>
     </div>
-  
+
     <mu-dialog :open="dialogCal" title="计算结果" @close="closeCal">
       <div id="cal-result">
         <div class="result">
@@ -55,9 +55,9 @@
           <p>平均成绩=∑(课程成绩*课程学分) / 课程总学分</p>
         </div>
       </div>
-      <mu-flat-button slot="actions" primary @click="closeCal" label="确定" ></mu-flat-button>
+      <mu-flat-button slot="actions" primary @click="closeCal" label="确定"></mu-flat-button>
     </mu-dialog>
-  
+
     <mu-dialog :open="errorLog" title="提示" @close="closeCal">
       {{errorText}}
       <br />
@@ -66,15 +66,28 @@
       </p>
       <mu-flat-button slot="actions" primary @click="closeCal" label="确定"></mu-flat-button>
     </mu-dialog>
-  
+
+    <mu-dialog :open="helpShow"   title="绩点计算规则更新说明" @close="closeCal">
+      <p>计算规则根据教务处的通知进行了同步修改：
+        <a href="https://mp.weixin.qq.com/s/IYRRRsQ6NjyXtykSMs71ZQ">点击查看通知详情</a>
+      </p>
+      <p>成绩绩点对照表：</p>
+      <img style="max-width:100%;" src="../../assets/1.png" alt="成绩对照表">
+      <p>说明：中文等级暂时按照对应分数段最高的计算，如果有最新的更加详细的对照表请发送邮件
+        <a href="mailto:1@lailin.xyz">1@lailin.xyz</a>
+      </p>
+      
+      <mu-flat-button slot="actions" primary @click="closeCal" label="确定"></mu-flat-button>
+    </mu-dialog>
+
     <mu-dialog :open="isLoading" dialogClass="loading">
       <mu-circal :size="60" color="#fff"></mu-circal>
     </mu-dialog>
-  
+
     <div class="loading" v-show="isLoading">
-  
+
     </div>
-  
+
   </div>
 </template>
 <script>
@@ -164,6 +177,7 @@ export default {
         uid: '',
         password: ''
       },
+      helpShow: false,
       exportCSVShow: false,
       isLoading: false,
       isLogin: false,
@@ -231,6 +245,7 @@ export default {
     closeCal() {
       this.dialogCal = false;
       this.errorLog = false;
+      this.helpShow = false;
     },
     handleChange(val) {
       this.bottomData = val
@@ -418,7 +433,12 @@ export default {
           this.getGrade()
         }
       }
-
+    }
+    if(localStorage.isHelp){
+      this.helpShow = false
+    }else{
+      this.helpShow = true
+      localStorage.isHelp = '0'
     }
   }
 }

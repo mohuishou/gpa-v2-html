@@ -2,7 +2,8 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import 'muse-components/styles/base.less'
+import 'muse-components/styles/base.less' // 加载基础的样式
+
 
 import axios from 'axios'
 

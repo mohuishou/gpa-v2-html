@@ -1,4 +1,34 @@
 let grade = {};
+
+const GRADE_GPA_OLD = [
+  [60, 0], //0-60[不包括60]
+  [61, 1], //60-61[不包括61]
+  [63, 1.3],
+  [66, 1.7],
+  [70, 2],
+  [73, 2.3],
+  [76, 2.7],
+  [80, 3],
+  [85, 3.3],
+  [90, 3.7],
+  [101, 4]
+]
+
+//分数绩点对照表
+const GRADE_GPA = [
+  [60, 0], //0-60[不包括60]
+  [61, 1], //60-61[不包括61]
+  [63, 1.3],
+  [66, 1.7],
+  [70, 2],
+  [73, 2.3],
+  [76, 2.7],
+  [80, 3],
+  [85, 3.3],
+  [90, 3.7],
+  [101, 4]
+]
+
 grade.cal = function (data) {
   let grade = [];
 
@@ -42,7 +72,7 @@ grade.cal = function (data) {
       d.credit = parseFloat(d.credit);
       t.push(d);
 
-      if (d.grade.trim() === ""){
+      if (d.grade.trim() === "") {
         continue
       }
       if (d.course_type == "必修") {
@@ -74,25 +104,13 @@ grade.cal = function (data) {
 }
 //分数绩点转换
 function grade2gpa(grade) {
-  var gpa = 0;
-  if (grade >= 95) {
-    gpa = 4.0;
-  } else if (grade >= 90 && grade <= 94) {
-    gpa = 3.8;
-  } else if (grade >= 85 && grade <= 89) {
-    gpa = 3.6;
-  } else if (grade >= 80 && grade <= 84) {
-    gpa = 3.2;
-  } else if (grade >= 75 && grade <= 79) {
-    gpa = 2.7;
-  } else if (grade >= 70 && grade <= 74) {
-    gpa = 2.2;
-  } else if (grade >= 65 && grade <= 69) {
-    gpa = 1.7;
-  } else if (grade >= 60 && grade <= 64) {
-    gpa = 1;
-  } else if (grade < 60) {
-    gpa = 0;
+  let gpa = 0;
+  let prev = 0;
+  for(let i=0;i<GRADE_GPA.length;i++){
+    if (grade >= prev && grade < GRADE_GPA[i][0]) {
+      gpa = GRADE_GPA[i][1]
+    }
+    prev = GRADE_GPA[i][0]
   }
   return gpa;
 }
@@ -108,17 +126,18 @@ function lv2grade(g) {
   }
   switch (g) {
     case "优秀":
-      g = 95;
+      g = 100;
       break;
     case "良好":
-      g = 86;
+      g = 84;
       break;
     case "中等":
       g = 75;
       break;
+    case "合格":
     case "通过":
     case "及格":
-      g = 60;
+      g = 69;
       break;
     case "未通过":
     case "不及格":

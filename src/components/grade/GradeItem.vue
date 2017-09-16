@@ -65,7 +65,7 @@
 import { card, cardHeader, cardTitle, cardText } from "muse-components/card"
 import { table, tr, td, th, tbody, thead } from "muse-components/table"
 
-const json2csv = require('json2csv');
+// const json2csv = require('json2csv');
 
 export default {
   props: {
@@ -87,62 +87,62 @@ export default {
   },
   computed: {
     //导出csv
-    exportCSV() {
-      let cvs = json2csv({
-        data: this.grade.grades,
-        fields: [
-          {
-            label: "课程号",
-            value: "course_id",
-            default: 'null'
-          },
-          {
-            label: "课序号",
-            value: "lesson_id",
-            default: 'null'
-          },
-          {
-            label: "课程名",
-            value: "course_name",
-            default: 'null'
-          },
-          {
-            label: "属性",
-            value: "course_type",
-            default: 'null'
-          },
-          {
-            label: "学分",
-            value: "credit",
-            default: 'null'
-          },
-          {
-            label: "绩点",
-            value: "gpa",
-            default: 'null'
-          },
-          {
-            label: "成绩",
-            value: "grade",
-            default: 'null'
-          },
-          {
-            label: "学期",
-            value: "term_name",
-            default: 'null'
-          },
-        ]
-      })
-      let blob = new Blob([cvs], { type: 'text/csv' }); //new way  
-      let csvUrl = URL.createObjectURL(blob);
-      return csvUrl
-    },
+    // exportCSV() {
+    //   let cvs = json2csv({
+    //     data: this.grade.grades,
+    //     fields: [
+    //       {
+    //         label: "课程号",
+    //         value: "course_id",
+    //         default: 'null'
+    //       },
+    //       {
+    //         label: "课序号",
+    //         value: "lesson_id",
+    //         default: 'null'
+    //       },
+    //       {
+    //         label: "课程名",
+    //         value: "course_name",
+    //         default: 'null'
+    //       },
+    //       {
+    //         label: "属性",
+    //         value: "course_type",
+    //         default: 'null'
+    //       },
+    //       {
+    //         label: "学分",
+    //         value: "credit",
+    //         default: 'null'
+    //       },
+    //       {
+    //         label: "绩点",
+    //         value: "gpa",
+    //         default: 'null'
+    //       },
+    //       {
+    //         label: "成绩",
+    //         value: "grade",
+    //         default: 'null'
+    //       },
+    //       {
+    //         label: "学期",
+    //         value: "term_name",
+    //         default: 'null'
+    //       },
+    //     ]
+    //   })
+    //   let blob = new Blob([cvs], { type: 'text/csv' }); //new way  
+    //   let csvUrl = URL.createObjectURL(blob);
+    //   return csvUrl
+    // },
 
     //是否展示csv
-    isShowCSV(){
-      grade.grades.length > 0
-      return false
-    }
+    // isShowCSV(){
+    //   grade.grades.length > 0
+    //   return false
+    // }
   },
 
   data(){
