@@ -67,16 +67,17 @@
       <mu-flat-button slot="actions" primary @click="closeCal" label="确定"></mu-flat-button>
     </mu-dialog>
 
-    <mu-dialog :open="helpShow"   title="绩点计算规则更新说明" @close="closeCal">
-      <p>计算规则根据教务处的通知进行了同步修改：
-        <a href="https://mp.weixin.qq.com/s/IYRRRsQ6NjyXtykSMs71ZQ">点击查看通知详情</a>
+    <mu-dialog :open="helpShow" title="绩点计算规则更新说明" @close="closeCal">
+      <p>2018年学期之后的成绩将采用新的绩点换算方式，对于之前取得的成绩采用原有的计算方式，绩点计算器将会自动判断年份来进行换算：<br />
+        <a href="https://mp.weixin.qq.com/s/IYRRRsQ6NjyXtykSMs71ZQ">点击查看新换算方式的通知详情</a><br />
+        <a href="http://jwc.scu.edu.cn/jwc/newsShow.action?news.id=1896">点击查看旧换算方式的通知详情</a>
       </p>
-      <p>成绩绩点对照表：</p>
+      <p>最新成绩绩点对照表：</p>
       <img style="max-width:100%;" src="../../assets/1.png" alt="成绩对照表">
       <p>说明：中文等级暂时按照对应分数段最高的计算，如果有最新的更加详细的对照表请发送邮件
         <a href="mailto:1@lailin.xyz">1@lailin.xyz</a>
       </p>
-      
+
       <mu-flat-button slot="actions" primary @click="closeCal" label="确定"></mu-flat-button>
     </mu-dialog>
 
@@ -233,7 +234,6 @@ export default {
         this.valid.uid = "学号必填且必须是数字"
         return
       }
-
       if (!this.params.password) {
         this.valid.password = "密码必填"
         return
@@ -242,6 +242,9 @@ export default {
       this.getGrade();
 
     },
+    /**
+     * 关闭计算窗口
+     */
     closeCal() {
       this.dialogCal = false;
       this.errorLog = false;
@@ -253,6 +256,9 @@ export default {
     switchTab(val) {
       this.activeTab = val;
     },
+    /**
+     * 获取所有成绩
+     */
     getGradeAll() {
       if (this.check.gpaAll != 0) {
         return
@@ -412,15 +418,12 @@ export default {
       }
 
     },
-
     encrypt(text) {
       return encryptor.encrypt(text);
     },
     decrypt(hex) {
-
       return encryptor.decrypt(hex);
     }
-
   },
   mounted() {
     let ua = navigator.userAgent.toLowerCase();
@@ -434,11 +437,11 @@ export default {
         }
       }
     }
-    if(localStorage.isHelp){
+    if (localStorage.isHelp2) {
       this.helpShow = false
-    }else{
+    } else {
       this.helpShow = true
-      localStorage.isHelp = '0'
+      localStorage.isHelp2 = '0'
     }
   }
 }
