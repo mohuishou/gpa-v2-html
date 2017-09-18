@@ -62,7 +62,8 @@
       {{errorText}}
       <br />
       <p style="background: #eee;padding: 15px;">
-        注：如果遇到网络问题，请先测试能否直接打开教务处网站
+        注：如果遇到网络问题，请先测试能否直接打开教务处网站->方案成绩->本学期成绩
+        如果没有问题请发送邮件到<a href="mailto:1@lailin.xyz">1@lailin.xyz</a>
       </p>
       <mu-flat-button slot="actions" primary @click="closeCal" label="确定"></mu-flat-button>
     </mu-dialog>
