@@ -62,8 +62,8 @@
       {{errorText}}
       <br />
       <p style="background: #eee;padding: 15px;">
-        注：如果遇到网络问题，请先测试能否直接打开教务处网站->方案成绩->本学期成绩
-        如果没有问题请发送邮件到<a href="mailto:1@lailin.xyz">1@lailin.xyz</a>
+        注：如果遇到网络问题，请先测试能否直接打开教务处网站->方案成绩->本学期成绩 如果没有问题请发送邮件到
+        <a href="mailto:1@lailin.xyz">1@lailin.xyz</a>
       </p>
       <mu-flat-button slot="actions" primary @click="closeCal" label="确定"></mu-flat-button>
     </mu-dialog>
@@ -161,16 +161,12 @@ export default {
     http.interceptors.response.use(
       res => {
         this.isLoading = false
-        if (res.data.status == 0) {
-          this.error(res.data.msg)
-        } else {
-          return res
-        }
+        return res
       },
-      err => {
-        this.isLoading = false
-        this.error(err.message)
-      }
+      // err => {
+      // this.isLoading = false
+      // this.error(err.message)
+      // }
     );
 
     return {
@@ -219,6 +215,7 @@ export default {
   },
   methods: {
     error(msg) {
+      this.isLoading = false
       this.errorText = msg
       this.errorLog = true
     },
@@ -267,6 +264,7 @@ export default {
       this.http.post("/gpa/all", this.params).then(
         resp => {
           if (resp.data.status == 1) {
+            this.isLogin = true
             let g = gradeObj.cal(resp.data.data);
             this.gradeAll = g.reverse();
             this.check.gpaAll = 1;
@@ -299,12 +297,26 @@ export default {
             this.isLogin = true
             this.grade = gradeObj.cal([resp.data.data])[0];
             this.check.gpa = 1;
-            if (this.isWechat) {
+            if (this.isWechat && !localStorage.uid) {
               //在微信中打开，保存用户名和密码
               localStorage.uid = this.encrypt(this.params.uid)
               localStorage.password = this.encrypt(this.params.password)
             }
+          } else {
+            this.error("本学期成绩获取失败，尝试获取所有成绩，请稍后：" + resp.data.msg)
+            setTimeout(() => {
+              this.closeCal()
+              this.switchTab(1)
+              this.getGradeAll()
+            }, 2000)
           }
+        },
+        resp => {
+          this.error("本学期成绩获取失败，尝试获取所有成绩：" + resp.data.msg)
+          setTimeout(() => {
+            this.getGradeAll()
+          }, 500)
+
         }
       )
     },
