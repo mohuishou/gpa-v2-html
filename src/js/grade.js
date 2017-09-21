@@ -37,7 +37,7 @@ const GRADE_GPA = [
 ]
 
 //等级成绩转换
-const LEVLE_GRADE = {
+const LEVLE_GRADE_OLD = {
   "优秀": 95,
   "良好": 86,
   "中等": 75,
@@ -48,7 +48,7 @@ const LEVLE_GRADE = {
 }
 
 //等级成绩转换
-const LEVLE_GRADE_OLD = {
+const LEVLE_GRADE = {
   "优秀": 100,
   "良好": 84,
   "中等": 75,
@@ -189,6 +189,7 @@ function lv2grade(g) {
   if (!isNaN(g)) {
     return g;
   }
+  console.log(calType)
   if (calType == 0) {
     return LEVLE_GRADE_OLD[g]
   } else {
